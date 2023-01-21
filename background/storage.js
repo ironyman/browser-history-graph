@@ -2,31 +2,31 @@ let DB;
 
 // export default {
 let Storage = {
-    init: () => {
-        const request = window.indexedDB.open("visits", 1);
-        request.onupgradeneeded = e => {
-            const db = request.result;
-            const store = db.createObjectStore("visits", {
-              keyPath: "id"
-            });
+  init: () => {
+    const request = window.indexedDB.open("visits", 1);
+    request.onupgradeneeded = e => {
+      const db = request.result;
+      const store = db.createObjectStore("visits", {
+        keyPath: "id"
+      });
 
-            store.createIndex("visitFromUrl", "visitFromUrl");
-            store.createIndex("url", "url");
-            store.createIndex("date", "date");
-        };
+      store.createIndex("visitFromUrl", "visitFromUrl");
+      store.createIndex("url", "url");
+      store.createIndex("date", "date");
+    };
 
 
-        return new Promise(resolve => {
-            request.onsuccess = e => {
-                DB = request.result;
-                // console.log("=>init()", e);
-                resolve(e);
-            };
-            request.onerror = e => {
-                console.log("storage failed init()", e);
-            };
-        });
-    },
+    return new Promise(resolve => {
+      request.onsuccess = e => {
+        DB = request.result;
+        // console.log("=>init()", e);
+        resolve(e);
+      };
+      request.onerror = e => {
+        console.log("storage failed init()", e);
+      };
+    });
+  },
 
   put: visit => {
     // log.log(logDir, "put()", session);
@@ -94,7 +94,7 @@ let Storage = {
     return new Promise((resolve, reject) => {
       request.onsuccess = () => {
         if (request.result) {
-        //   log.log(logDir, "=>get()", request.result);
+          //   log.log(logDir, "=>get()", request.result);
           resolve(request.result);
         } else reject(request);
       };
@@ -107,36 +107,36 @@ let Storage = {
   // I don't think this works.
   open: async () => {
     const dbPromise = window.indexedDB.open('History', 1, function (upgradeDb) {
-        switch (upgradeDb.oldVersion) {
-          case 0:
-            if (!upgradeDb.objectStoreNames.contains('visits')) {
-                const store = upgradeDb.createObjectStore("visits", {
-                    keyPath: "id"
-                });
+      switch (upgradeDb.oldVersion) {
+        case 0:
+          if (!upgradeDb.objectStoreNames.contains('visits')) {
+            const store = upgradeDb.createObjectStore("visits", {
+              keyPath: "id"
+            });
 
-                store.createIndex("fromUrl", "fromUrl", { unique: false });
-                store.createIndex("url", "url", { unique: false });
-                store.createIndex("date", "date", { unique: false });
-            }
+            store.createIndex("fromUrl", "fromUrl", { unique: false });
+            store.createIndex("url", "url", { unique: false });
+            store.createIndex("date", "date", { unique: false });
+          }
 
         //   case 1:
         //     const peopleStore = upgradeDb.transaction.objectStore('store');
         //     peopleStore.createIndex('price', 'price');
-        }
+      }
     });
     return dbPromise;
   },
   put2(visit) {
     return Storage.open()
-        .then(function (db) {
-            const tx = db.transaction('visits', 'readwrite');
-            const store = tx.objectStore('visits');
-            store.put(visit);
-            return tx.complete;
-        })
-        .then(function () {
-            console.log('Added item to the store!');
-        });
+      .then(function (db) {
+        const tx = db.transaction('visits', 'readwrite');
+        const store = tx.objectStore('visits');
+        store.put(visit);
+        return tx.complete;
+      })
+      .then(function () {
+        console.log('Added item to the store!');
+      });
   },
 
   queryDate: (lower, upper) => {
@@ -156,20 +156,20 @@ let Storage = {
       range = IDBKeyRange.lowerBound(lower);
     }
 
-        const tx = DB.transaction(['visits'], 'readonly');
-        const store = tx.objectStore('visits');
-        const index = store.index('date');
-        index.openCursor(range).onsuccess = (event) => {
-            const cursor = event.target.result;
-            if (!cursor) {
-                return;
-              }
-              console.log('Cursored at:', cursor.key);
-              for (const field in cursor.value) {
-                console.log(field, cursor.value[field]);
-              }
-              return cursor.continue();
-          };
+    const tx = DB.transaction(['visits'], 'readonly');
+    const store = tx.objectStore('visits');
+    const index = store.index('date');
+    index.openCursor(range).onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (!cursor) {
+        return;
+      }
+      console.log('Cursored at:', cursor.key);
+      for (const field in cursor.value) {
+        console.log(field, cursor.value[field]);
+      }
+      return cursor.continue();
+    };
   }
 }
 export default Storage;
