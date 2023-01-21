@@ -2,8 +2,13 @@ import * as visit from './visit.js';
 
 export class NavigationListener {
 	constructor() {
-		console.log("Creating NavigationListener");
+		// console.log("Creating NavigationListener");
+
+		// map tabId -> tabInfo
 		this.currentTabs = {};
+		// map tabId -> Visit
+		this.history = {};
+
 		// https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab
 
 		browser.tabs.onActivated.addListener(this.onTabActivated.bind(this));
@@ -33,28 +38,57 @@ export class NavigationListener {
 	onTabUpdated(tabId, changeInfo, tabInfo) {
 		// console.log(`onTabUpdated: Updated tab: ${tabId}`);
 		// console.log("onTabUpdated: Changed attributes: ", changeInfo.status);
-		// console.log("onTabUpdated: New tab Info: ", tabInfo);
+		// console.log("onTabUpdated: Changed attributes: ", changeInfo.title);
+		// console.log("onTabUpdated: Changed attributes: ", changeInfo.url);
+		// console.log("onTabUpdated: New tab Info: ", tabInfo.status);
+		// console.log("onTabUpdated: New tab Info: ", tabInfo.title);
+		// console.log("onTabUpdated: New tab Info: ", tabInfo.url);
 		try {
-			if (changeInfo.url) {
-				console.log(`onTabUpdated: Tab: ${tabId} URL changed to ${changeInfo.url}`);
+			if (tabInfo.status == "loading") {
+				if (changeInfo.url) {
+					console.log(`onTabUpdated: Tab: ${tabId} URL changed to ${changeInfo.url}`);
 
-				let existingTab;
-				existingTab = this.currentTabs[tabId];
+					let existingTab = this.currentTabs[tabId];
+					if (existingTab === undefined) {
+						console.log("onTabUpdated: Ooops this tab doesn't exist, create it now");
+						this.onTabCreated(tabInfo);
+						return;
+					}
 
-				if (existingTab === undefined) {
-					console.log("onTabUpdated: Ooops this tab doesn't exist, create it now");
-					this.onTabCreated(tabInfo);
+					let existingVisit = this.history[tabId];
+					if (existingVisit === undefined) {
+						console.log("onTabUpdated: Ooops this history doesn't exist, tragic");
+						alert("onTabUpdated: Ooops this history doesn't exist, tragic");
+						return;
+					}
+
+					// console.log(`onTabUpdated: ${tab.url}`);
+					// Ignore refreshes.
+					if (existingTab.url == changeInfo.url) {
+						return;
+					}
+
+					this.history[tabId] = new visit.Visit({
+						title: changeInfo.title,
+						url: changeInfo.url,
+						status: changeInfo.status,
+						fromUrl: existingTab.url,
+						fromId: existingVisit.id,
+					});
+					console.log(this.history[tabId].serializeJson());
+					this.history[tabId].save();
+					this.currentTabs[tabId] = tabInfo;
+				}
+			} else if (tabInfo.status == "complete") {
+				let existingVisit = this.history[tabId];
+				if (existingVisit === undefined) {
+					console.log("onTabUpdated: Ooops this history doesn't exist, tragic");
+					alert("onTabUpdated: Ooops this history doesn't exist, tragic");
 					return;
 				}
-				// console.log(`onTabUpdated: ${tab.url}`);
-				// Ignore refreshes.
-				if (existingTab.url == changeInfo.url) {
-					return;
-				}
-
-				let edge = new visit.Visit(changeInfo.title, changeInfo.url, changeInfo.status, existingTab.url);
-				console.log(edge.serializeJson());
-				edge.save();
+				existingVisit.status = tabInfo.status;
+				existingVisit.title = tabInfo.title;
+				existingVisit.save();
 				this.currentTabs[tabId] = tabInfo;
 			}
 		} catch (e) {
@@ -62,47 +96,29 @@ export class NavigationListener {
 		}
 	}
 	onTabRemoved(tabId, removeInfo) {
-		console.log(`onTabRemoved: Tab: ${tabId} is closing`);
-		console.log(`onTabRemoved: Window ID: ${removeInfo.windowId}`);
-		console.log(`onTabRemoved: Window is closing: ${removeInfo.isWindowClosing}`);
+		// console.log(`onTabRemoved: Tab: ${tabId} is closing`);
+		// console.log(`onTabRemoved: Window ID: ${removeInfo.windowId}`);
+		// console.log(`onTabRemoved: Window is closing: ${removeInfo.isWindowClosing}`);
 		delete this.currentTabs[tabId];
+		delete this.history[tabId];
 	}
 	onTabMoved(tabId, moveInfo) {
-		console.log(`onTabMoved: Tab ${tabId} moved from ${moveInfo.fromIndex} to ${moveInfo.toIndex}`);
+		// console.log(`onTabMoved: Tab ${tabId} moved from ${moveInfo.fromIndex} to ${moveInfo.toIndex}`);
 	}
 	onTabCreated(tab) {
-		console.log(`onTabCreated: Tab ${tab.id}, ${tab.url}`);
+		// console.log(`onTabCreated: Tab ${tab.id}, ${tab.url}`);
 		this.currentTabs[tab.id] = tab;
-
+		this.history[tab.id] = new visit.Visit({
+			title: tab.title,
+			url: tab.url,
+			status: tab.status
+		});
+		// console.log(this.history[tab.id].serializeJson());
 		if (tab.url != "about:blank" && tab.url != "about:newtab") {
-			let edge = new visit.Visit(tab.title, tab.url, tab.status, "");
-			console.log(edge.serializeJson());
-			edge.save();
+			this.history[tab.id].save();
 		}
 	}
 	// onBeforeNavigate(details) {
 	//     console.log(`onBeforeNavigate to: ${details.url}`);
 	// }
 }
-
-
-
-// // https://developer.chrome.com/docs/extensions/mv3/messaging/
-// // https://developer.chrome.com/docs/extensions/reference/runtime/
-// // For firefox background.js has access to theme information. Popup does not.
-// // Chrome doesn't have this.
-// chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-// 	if (message === 'get-current-theme') {
-// 		// Only firefox supports this.
-// 		if (browser) {
-// 			browser.theme.getCurrent().then(function (theme) {
-// 				console.log("got theme", theme);
-// 				sendResponse(theme);
-// 			});
-// 		} else {
-// 			sendResponse(null);
-// 		}
-// 		return true;
-// 	}
-// });
-

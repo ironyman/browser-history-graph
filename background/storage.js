@@ -19,18 +19,18 @@ let Storage = {
         return new Promise(resolve => {
             request.onsuccess = e => {
                 DB = request.result;
-                console.log("=>init()", e);
+                // console.log("=>init()", e);
                 resolve(e);
             };
             request.onerror = e => {
-                console.log("init()", e);
+                console.log("storage failed init()", e);
             };
         });
     },
 
   put: visit => {
     // log.log(logDir, "put()", session);
-    console.log("Putting ", typeof visit);
+    // console.log("Putting ", typeof visit);
     const db = DB;
     const transaction = db.transaction("visits", "readwrite");
     const store = transaction.objectStore("visits");

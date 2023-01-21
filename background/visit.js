@@ -1,12 +1,12 @@
 import Storage from "./storage.js";
 
 export class Visit {
-    constructor(title, url, status, visitFromUrl, date, id) {
+    constructor({title, url, fromUrl, status, date, id, fromId}) {
         this.title = title;
         this.url = url;
         this.status = status;
-
-        this.visitFromUrl = visitFromUrl;
+        this.fromUrl = fromUrl;
+        this.fromId = fromId;
 
         if (date) {
             this.date = date;
@@ -14,10 +14,10 @@ export class Visit {
             this.date = new Date();
         }
 
-        if (id == undefined) {
-            this.id = this.uuidv4();
-        } else {
+        if (id) {
             this.id = id;
+        } else {
+            this.id = this.uuidv4();
         }
     }
 
@@ -34,16 +34,25 @@ export class Visit {
     }
 
     fromJson(json) {
-        return new Visit(json.title, json.url, json.status, json.visitFromUrl, json.date, json.id);
+        return new Visit({
+            title: json.title,
+            url: json.url,
+            fromUrl: json.fromUrl,
+            status: json.status,
+            date: json.date,
+            id: json.id,
+            fromId: json.fromId
+        });
     }
 
     async save() {
         return Storage.put({
             title: this.title,
             url: this.url,
-            visitFromUrl: this.visitFromUrl,
+            fromUrl: this.fromUrl,
             date: this.date.getTime(),
             id: this.id,
+            fromId: this.fromId,
         });
     }
 
@@ -55,5 +64,3 @@ export class Visit {
         return Storage.queryDate(hourago.getTime(), now.getTime());
     }
 }
-
-// Store in indexed

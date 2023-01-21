@@ -1,5 +1,5 @@
 chrome.runtime.sendMessage('get-current-theme', function (theme) {
-    console.log("response", theme);
+    // console.log("response", theme);
     if (theme && theme.colors) {
         const colors = [
             `background: ${theme.colors.popup}`,

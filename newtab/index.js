@@ -44,9 +44,9 @@ const showCustomPage = opts => {
 	document.body.append( iframe );
 };
 
-const init = _ => {
-	browser.storage.sync.get([ 'customNewTabUrl', 'customNewTabTitle', 'theme', 'customBackgroundColor' ])
-		.then( showCustomPage );
-};
+// const init = _ => {
+// 	browser.storage.sync.get([ 'customNewTabUrl', 'customNewTabTitle', 'theme', 'customBackgroundColor' ])
+// 		.then( showCustomPage );
+// };
 
-init();
+// init();
