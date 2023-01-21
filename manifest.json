@@ -1,0 +1,48 @@
+{
+  "name": "Session",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "View browsing history",
+  "homepage_url": "http://firefox.com",
+  "background": {
+    "page": "background/index.html"
+  },
+  "browser_action": {
+    "default_icon": {},
+    "default_title": "Popup",
+    "default_popup": "browserAction/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*/*"
+      ],
+      "css": [
+        "contentScript/myStyles.css"
+      ],
+      "js": [
+        "contentScript/contentScript.js"
+      ]
+    }
+  ],
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Alt+P",
+        "linux": "Alt+P",
+        "windows": "Alt+P",
+        "mac": "Alt+P"
+      }
+    }
+  },
+  "chrome_url_overrides" : {
+    "newtab": "newtab/index.html"
+  },
+  "permissions": [
+    "https://*/*",
+    "http://*/*",
+    "tabs",
+    "activeTab",
+    "webNavigation"
+  ]
+}
