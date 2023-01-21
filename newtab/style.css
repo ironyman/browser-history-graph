@@ -21,11 +21,13 @@ body.t-dark {
 	background-color: #323234;
 }
 
-.cntp-iframe {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100vw;
-	height: 100vh;
-	border: 0;
+.node {
+  fill: #ccc;
+  stroke: #fff;
+  stroke-width: 2px;
+}
+
+.link {
+  stroke: #777;
+  stroke-width: 2px;
 }

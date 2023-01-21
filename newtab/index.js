@@ -1,145 +1,183 @@
-// Copyright 2021 Observable, Inc.
-// Released under the ISC license.
-// https://observablehq.com/@d3/force-directed-graph
-function ForceGraph({
-  nodes, // an iterable of node objects (typically [{id}, …])
-  links // an iterable of link objects (typically [{source, target}, …])
-}, {
-  nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
-  nodeGroup, // given d in nodes, returns an (ordinal) value for color
-  nodeGroups, // an array of ordinal values representing the node groups
-  nodeTitle, // given d in nodes, a title string
-  nodeFill = "currentColor", // node stroke fill (if not using a group color encoding)
-  nodeStroke = "#fff", // node stroke color
-  nodeStrokeWidth = 1.5, // node stroke width, in pixels
-  nodeStrokeOpacity = 1, // node stroke opacity
-  nodeRadius = 5, // node radius, in pixels
-  nodeStrength,
-  linkSource = ({ source }) => source, // given d in links, returns a node identifier string
-  linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
-  linkStroke = "#999", // link stroke color
-  linkStrokeOpacity = 0.6, // link stroke opacity
-  linkStrokeWidth = 1.5, // given d in links, returns a stroke width in pixels
-  linkStrokeLinecap = "round", // link stroke linecap
-  linkStrength,
-  colors = d3.schemeTableau10, // an array of color strings, for the node groups
-  width = 640, // outer width, in pixels
-  height = 400, // outer height, in pixels
-  invalidation // when this promise resolves, stop the simulation
-} = {}) {
-  // Compute values.
-  const N = d3.map(nodes, nodeId).map(intern);
-  const LS = d3.map(links, linkSource).map(intern);
-  const LT = d3.map(links, linkTarget).map(intern);
-  if (nodeTitle === undefined) nodeTitle = (_, i) => N[i];
-  const T = nodeTitle == null ? null : d3.map(nodes, nodeTitle);
-  const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup).map(intern);
-  const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, linkStrokeWidth);
-  const L = typeof linkStroke !== "function" ? null : d3.map(links, linkStroke);
+// import * as d3 from "../node_modules/d3/dist/d3.js";
 
-  // Replace the input nodes and links with mutable objects for the simulation.
-  nodes = d3.map(nodes, (_, i) => ({ id: N[i] }));
-  links = d3.map(links, (_, i) => ({ source: LS[i], target: LT[i] }));
+// chrome.runtime.sendMessage('get-recent-history', function (visits) {
+//   console.log("response", visits.length);
+// });
 
-  // Compute default domains.
-  if (G && nodeGroups === undefined) nodeGroups = d3.sort(G);
+async function getHistory() {
+  // let visits = await chrome.runtime.sendMessage('get-recent-history');
+  // console.log("response", visits.length);
+  return new Promise(resolve => {
+    browser.runtime.sendMessage('get-recent-history', function (response) {
+      // console.log("response", response[0].url);
+      resolve(response);
+    });
+  });
+}
 
-  // Construct the scales.
-  const color = nodeGroup == null ? null : d3.scaleOrdinal(nodeGroups, colors);
+async function setBackground() {
+  let bg = await fetch('https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US')
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data.images[0].url);
+      return data.images[0].url;
+    });
+  document.querySelector('body').style = `
+  background-image: url(https://bing.com/${bg});
+  width: 100%;
+  height: 100vh;
+  background-position: center;
+  background-size: cover;
+  `;
+}
+async function main() {
+  setBackground();
+  let history = await getHistory();
+  let nodesMap = {};
+  let width = 640;
+  let height = 480;
+  try {
+    // compute nodes from links data
+    history.forEach(function (visit) {
+      visit.source = nodesMap[visit.fromId] ||
+        (nodesMap[visit.fromId] = { id: visit.fromId });
+      visit.target = nodesMap[visit.id] ||
+        (nodesMap[visit.id] = { id: visit.id });
+    });
+    let nodes = Object.values(nodesMap);
 
-  // Construct the forces.
-  const forceNode = d3.forceManyBody();
-  const forceLink = d3.forceLink(links).id(({ index: i }) => N[i]);
-  if (nodeStrength !== undefined) forceNode.strength(nodeStrength);
-  if (linkStrength !== undefined) forceLink.strength(linkStrength);
+    // add a SVG to the body for our viz
+    var svg = d3.select('body').append('svg')
+      .attr('width', width)
+      .attr('height', height);
 
-  const simulation = d3.forceSimulation(nodes)
-    .force("link", forceLink)
-    .force("charge", forceNode)
-    .force("center", d3.forceCenter())
-    .on("tick", ticked);
+    var simulation = d3.forceSimulation()
+      .force("link", d3.forceLink().id(function (d) { return d.id; }))
+      .force("charge", null)
+      // .force("charge", d3.forceManyBody().strength(1))
+      .force("center", d3.forceCenter(width / 2, height / 2));
 
-  const svg = d3.create("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("viewBox", [-width / 2, -height / 2, width, height])
-    .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+    var link = svg.append("g")
+      .style("stroke", "#aaa")
+      .selectAll("line")
+      .data(history)
+      .enter().append("line");
 
-  const link = svg.append("g")
-    .attr("stroke", typeof linkStroke !== "function" ? linkStroke : null)
-    .attr("stroke-opacity", linkStrokeOpacity)
-    .attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
-    .attr("stroke-linecap", linkStrokeLinecap)
-    .selectAll("line")
-    .data(links)
-    .join("line");
+    var node = svg.append("g")
+      .attr("class", "nodes")
+      .selectAll("circle")
+      .data(nodes)
+      .enter().append("circle")
+      .attr("r", 6)
+      .call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended));
 
-  const node = svg.append("g")
-    .attr("fill", nodeFill)
-    .attr("stroke", nodeStroke)
-    .attr("stroke-opacity", nodeStrokeOpacity)
-    .attr("stroke-width", nodeStrokeWidth)
-    .selectAll("circle")
-    .data(nodes)
-    .join("circle")
-    .attr("r", nodeRadius)
-    .call(drag(simulation));
+    var label = svg.append("g")
+      .attr("class", "labels")
+      .selectAll("text")
+      .data(nodes)
+      .enter().append("text")
+      .attr("class", "label")
+      .text(function (d) { return d.title; });
 
-  if (W) link.attr("stroke-width", ({ index: i }) => W[i]);
-  if (L) link.attr("stroke", ({ index: i }) => L[i]);
-  if (G) node.attr("fill", ({ index: i }) => color(G[i]));
-  if (T) node.append("title").text(({ index: i }) => T[i]);
-  if (invalidation != null) invalidation.then(() => simulation.stop());
+    simulation
+      .nodes(nodes)
+      .on("tick", ticked);
 
-  function intern(value) {
-    return value !== null && typeof value === "object" ? value.valueOf() : value;
+    simulation.force("link")
+      .links(history);
+
+  } catch (e) {
+    console.log("d3", e.toString());
   }
+  function dragstarted(event, d) {
+    try {
+      if (!event.active)
+        simulation.alphaTarget(0.3).restart()
+      simulation.fix(d);
+    } catch (e) {
+      console.log("d3", e.toString());
+    }
+
+  }
+
+  function dragged(event, d) {
+    try {
+      // simulation.alphaTarget(0.3).restart();
+      d.fx = event.x;
+      d.fy = event.y;
+    } catch (e) {
+      console.log("d3", e.toString());
+    }
+  }
+
+  function dragended(event, d) {
+    try {
+      if (!event.active) simulation.alphaTarget(0);
+      delete d.fx;
+      delete d.fy;
+    } catch (e) {
+      console.log("d3", e.toString());
+    }
+  }
+
 
   function ticked() {
     link
-      .attr("x1", d => d.source.x)
-      .attr("y1", d => d.source.y)
-      .attr("x2", d => d.target.x)
-      .attr("y2", d => d.target.y);
+      .attr("x1", function (d) { return d.source.x; })
+      .attr("y1", function (d) { return d.source.y; })
+      .attr("x2", function (d) { return d.target.x; })
+      .attr("y2", function (d) { return d.target.y; });
 
     node
-      .attr("cx", d => d.x)
-      .attr("cy", d => d.y);
+      .attr("r", 20)
+      .style("fill", "#d9d9d9")
+      .style("stroke", "#969696")
+      .style("stroke-width", "1px")
+      .attr("cx", function (d) { return d.x + 6; })
+      .attr("cy", function (d) { return d.y - 6; });
+
+    label
+      .attr("x", function (d) { return d.x; })
+      .attr("y", function (d) { return d.y; })
+      .style("font-size", "20px").style("fill", "#4393c3");
   }
 
-  function drag(simulation) {
-    function dragstarted(event) {
-      if (!event.active) simulation.alphaTarget(0.3).restart();
-      event.subject.fx = event.subject.x;
-      event.subject.fy = event.subject.y;
-    }
+  //   var force = d3.layout.force() //build the layout
+  //       .size([width, height]) //specified earlier
+  //       .nodes(d3.values(nodes)) //add nodes
+  //       .links(links) //add links
+  //       .on("tick", tick) //what to do
+  //       .linkDistance(300) //set for proper svg size
+  //       .start(); //kick the party off!
 
-    function dragged(event) {
-      event.subject.fx = event.x;
-      event.subject.fy = event.y;
-    }
+  //           // add the links
+  //     var link = svg.selectAll('.link')
+  //     .data(links)
+  //     .enter().append('line')
+  //     .attr('class', 'link');
 
-    function dragended(event) {
-      if (!event.active) simulation.alphaTarget(0);
-      event.subject.fx = null;
-      event.subject.fy = null;
-    }
+  // // add the nodes
+  // var node = svg.selectAll('.node')
+  //     .data(force.nodes()) //add
+  //     .enter().append('circle')
+  //     .attr('class', 'node')
+  //     .attr('r', width * 0.03); //radius of circle
 
-    return d3.drag()
-      .on("start", dragstarted)
-      .on("drag", dragged)
-      .on("end", dragended);
-  }
+  //     function tick(e) {
 
-  return Object.assign(svg.node(), { scales: { color } });
+  //       node.attr('cx', function(d) { return d.x; })
+  //           .attr('cy', function(d) { return d.y; })
+  //           .call(force.drag);
+
+  //       link.attr('x1', function(d) { return d.source.x; })
+  //           .attr('y1', function(d) { return d.source.y; })
+  //           .attr('x2', function(d) { return d.target.x; })
+  //           .attr('y2', function(d) { return d.target.y; });
+
+  //   }
 }
 
-chart = ForceGraph(miserables, {
-  nodeId: d => d.id,
-  nodeGroup: d => d.group,
-  nodeTitle: d => `${d.id}\n${d.group}`,
-  linkStrokeWidth: l => Math.sqrt(l.value),
-  width,
-  height: 600,
-  invalidation // a promise to stop the simulation when the cell is re-run
-})
+main();

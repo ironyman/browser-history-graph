@@ -1,8 +1,8 @@
 import { Visit } from './visit.js';
 import Storage from "./storage.js";
 export function initLpc() {
-  chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
-    console.log("background received message", message);
+  browser.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
+    // console.log("background received message", message);
     if (message === 'clickme') {
       Visit.getRecent();
     } else if (message === 'get-current-theme') {
@@ -27,6 +27,12 @@ export function initLpc() {
         sendResponse(null);
       }
       return true;
+    } else if (message === 'get-recent-history') {
+      let result = await Visit.getRecent();
+      console.log("get-recent-history got length of ", result.length);
+      // sendResponse({ result: result, test: "hi" });
+      // Need to return true for sendResponse to work.
+      return result;
     }
   });
 }

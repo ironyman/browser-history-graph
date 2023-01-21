@@ -1,3 +1,5 @@
+import { Visit } from "./visit.js";
+
 let DB;
 
 // export default {
@@ -139,10 +141,7 @@ let Storage = {
       });
   },
 
-  queryDate: (lower, upper) => {
-
-    console.log("queryinf");
-
+  queryDate: async (lower, upper) => {
     if (lower === '' && upper === '') {
       return;
     }
@@ -159,17 +158,26 @@ let Storage = {
     const tx = DB.transaction(['visits'], 'readonly');
     const store = tx.objectStore('visits');
     const index = store.index('date');
-    index.openCursor(range).onsuccess = (event) => {
-      const cursor = event.target.result;
-      if (!cursor) {
-        return;
-      }
-      console.log('Cursored at:', cursor.key);
-      for (const field in cursor.value) {
-        console.log(field, cursor.value[field]);
-      }
-      return cursor.continue();
-    };
+
+    return new Promise(resolve => {
+      let result = [];
+      index.openCursor(range).onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (!cursor) {
+          resolve(result);
+          return;
+        }
+
+        // This is the date
+        // console.log('Cursored at:', cursor.key);
+        // for (const field in cursor.value) {
+          // console.log(field, cursor.value[field]);
+        // }
+        // console.log("twf", cursor.value.url);
+        result.push(new Visit(cursor.value));
+        return cursor.continue();
+      };
+    });
   }
 }
 export default Storage;
