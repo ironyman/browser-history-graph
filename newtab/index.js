@@ -19,7 +19,7 @@ async function setBackground() {
   let bg = await fetch('https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US')
     .then((response) => response.json())
     .then((data) => {
-      console.log(data.images[0].url);
+      // console.log(data.images[0].url);
       return data.images[0].url;
     });
   document.querySelector('body').style = `
@@ -29,6 +29,7 @@ async function setBackground() {
   background-position: center;
   background-size: cover;
   `;
+  // this.context.fillStyle = (window.matchMedia('(prefers-color-scheme: dark)').matches ? "#f2f3f4" : "#606368");
 }
 async function main() {
   setBackground();

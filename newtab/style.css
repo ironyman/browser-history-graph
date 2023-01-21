@@ -12,6 +12,16 @@ body {
 	width: 100vw;
 	height: 100vh;
 }
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: black;
+  }
+}
+@media (prefers-color-scheme: light) {
+  body {
+    background-color: lightgray;
+  }
+}
 
 body.t-light {
 	background-color: #fff;

@@ -12,7 +12,8 @@ let Storage = {
         keyPath: "id"
       });
 
-      store.createIndex("visitFromUrl", "visitFromUrl");
+      store.createIndex("fromUrl", "fromUrl");
+      store.createIndex("fromId", "fromId");
       store.createIndex("url", "url");
       store.createIndex("date", "date");
     };
