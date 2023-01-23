@@ -41,17 +41,17 @@ export class NavigationListener {
     // console.log(`onTabActivated: Tab ${activeInfo.tabId} was activated`);
   }
   onTabUpdated(tabId, changeInfo, tabInfo) {
-    console.log(`onTabUpdated: Updated tab: ${tabId}`);
-    console.log("onTabUpdated: Changed attributes: ", changeInfo.status);
-    console.log("onTabUpdated: Changed attributes: ", changeInfo.title);
-    console.log("onTabUpdated: Changed attributes: ", changeInfo.url);
-    console.log("onTabUpdated: New tab Info: ", tabInfo.status);
-    console.log("onTabUpdated: New tab Info: ", tabInfo.title);
-    console.log("onTabUpdated: New tab Info: ", tabInfo.url);
+    // console.log(`onTabUpdated: Updated tab: ${tabId}`);
+    // console.log("onTabUpdated: Changed attributes: ", changeInfo.status);
+    // console.log("onTabUpdated: Changed attributes: ", changeInfo.title);
+    // console.log("onTabUpdated: Changed attributes: ", changeInfo.url);
+    // console.log("onTabUpdated: New tab Info: ", tabInfo.status);
+    // console.log("onTabUpdated: New tab Info: ", tabInfo.title);
+    // console.log("onTabUpdated: New tab Info: ", tabInfo.url);
     try {
       if (tabInfo.status == "loading") {
         if (changeInfo.url) {
-          console.log(`onTabUpdated: Tab: ${tabId} URL changed to ${changeInfo.url}`);
+          // console.log(`onTabUpdated: Tab: ${tabId} URL changed to ${changeInfo.url}`);
 
           let existingTab = this.currentTabs[tabId];
           if (existingTab === undefined) {

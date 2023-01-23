@@ -34,7 +34,7 @@ async function setBackground() {
 }
 
 function urlToDomain(url) {
-  if (url == "about:newtab" || url == "about:blank" || url == document.location.href) return "Home";
+  if (!url || url == "about:newtab" || url == "about:blank" || url == document.location.href) return "Home";
   return (new URL(url)).hostname;
 }
 
@@ -59,9 +59,9 @@ async function main() {
       let domain = urlToDomain(visit.url);
 
       visit.source = nodesMap[fromDomain] ||
-        (nodesMap[fromDomain] = { id: fromDomain, title: fromDomain, icon: `${fromDomain}/favicon.ico` });
+        (nodesMap[fromDomain] = { id: fromDomain, title: fromDomain, icon: `https://${fromDomain}/favicon.ico` });
       visit.target = nodesMap[domain] ||
-        (nodesMap[domain] = { id: domain, title: domain, icon: `${domain}/favicon.ico` });
+        (nodesMap[domain] = { id: domain, title: domain, icon: `https://${domain}/favicon.ico` });
     });
     let nodes = Object.values(nodesMap);
 
@@ -93,13 +93,24 @@ async function main() {
       .attr("class", "nodes")
       .selectAll("circle")
       .data(nodes)
-      .enter().append("circle")
-      .attr("r", 6)
-      // .style('fill', 'url(#icon)')
+      .enter()
+      .append("circle")
       .call(d3.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
-        .on("end", dragended));
+        .on("end", dragended))
+
+    var favicon = svg.append("g")
+      .attr("class", "favicon")
+      .selectAll("image")
+      .data(nodes)
+      .enter().append("image")
+      .attr('width', 24)
+      .attr('height', 24)
+      .attr("xlink:href", function(d) {
+        return d.icon;
+      })
+
 
     var label = svg.append("g")
       .attr("class", "labels")
@@ -166,13 +177,17 @@ async function main() {
       .style("fill", "#d9d9d9")
       .style("stroke", "#969696")
       .style("stroke-width", "1px")
-      .attr("cx", function (d) { return d.x + 6; })
-      .attr("cy", function (d) { return d.y - 6; });
+      .attr("cx", function (d) { return d.x; })
+      .attr("cy", function (d) { return d.y; });
 
     label
       .attr("x", function (d) { return d.x; })
       .attr("y", function (d) { return d.y; })
       .style("font-size", "20px").style("fill", "#4393c3");
+
+    favicon
+      .attr("x", function (d) { return d.x-12; })
+      .attr("y", function (d) { return d.y-12; });
   }
 
   //   var force = d3.layout.force() //build the layout

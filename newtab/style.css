@@ -46,3 +46,8 @@ body.t-dark {
   font-size: 10pt !important;
   transform: translate(20px, 20px);
 }
+
+.favicon {
+  /* transform: translate(20px, 20px); */
+  pointer-events: none;
+}
