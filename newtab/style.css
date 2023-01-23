@@ -41,3 +41,8 @@ body.t-dark {
   stroke: #777;
   stroke-width: 2px;
 }
+
+.label {
+  font-size: 10pt !important;
+  transform: translate(20px, 20px);
+}

@@ -56,7 +56,6 @@ export class Visit {
     });
   }
 
-
   static async getRecent() {
     let now = new Date();
     let hourago = new Date(now.getTime() - (1000 * 60 * 60));

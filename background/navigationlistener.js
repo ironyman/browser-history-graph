@@ -41,13 +41,13 @@ export class NavigationListener {
     // console.log(`onTabActivated: Tab ${activeInfo.tabId} was activated`);
   }
   onTabUpdated(tabId, changeInfo, tabInfo) {
-    // console.log(`onTabUpdated: Updated tab: ${tabId}`);
-    // console.log("onTabUpdated: Changed attributes: ", changeInfo.status);
-    // console.log("onTabUpdated: Changed attributes: ", changeInfo.title);
-    // console.log("onTabUpdated: Changed attributes: ", changeInfo.url);
-    // console.log("onTabUpdated: New tab Info: ", tabInfo.status);
-    // console.log("onTabUpdated: New tab Info: ", tabInfo.title);
-    // console.log("onTabUpdated: New tab Info: ", tabInfo.url);
+    console.log(`onTabUpdated: Updated tab: ${tabId}`);
+    console.log("onTabUpdated: Changed attributes: ", changeInfo.status);
+    console.log("onTabUpdated: Changed attributes: ", changeInfo.title);
+    console.log("onTabUpdated: Changed attributes: ", changeInfo.url);
+    console.log("onTabUpdated: New tab Info: ", tabInfo.status);
+    console.log("onTabUpdated: New tab Info: ", tabInfo.title);
+    console.log("onTabUpdated: New tab Info: ", tabInfo.url);
     try {
       if (tabInfo.status == "loading") {
         if (changeInfo.url) {
@@ -67,9 +67,20 @@ export class NavigationListener {
             return;
           }
 
+          let fromUrl = existingTab.url;
+
+          // If this tab is opened by another tab, then we want to collapse the visits so that these
+          // blank pages won't be a fromUrl
+          if (fromUrl == "about:blank" || fromUrl == "about:newtab") {
+            let previousTab = this.currentTabs[existingTab.openerTabId];
+            if (previousTab) {
+              fromUrl = previousTab.url;
+            }
+          }
+
           // console.log(`onTabUpdated: ${tab.url}`);
           // Ignore refreshes.
-          if (existingTab.url == changeInfo.url) {
+          if (fromUrl == changeInfo.url) {
             return;
           }
 
@@ -77,7 +88,7 @@ export class NavigationListener {
             title: changeInfo.title,
             url: changeInfo.url,
             status: changeInfo.status,
-            fromUrl: existingTab.url,
+            fromUrl: fromUrl,
             fromId: existingVisit.id,
           });
           console.log(this.history[tabId].serializeJson());
@@ -111,12 +122,12 @@ export class NavigationListener {
     // console.log(`onTabMoved: Tab ${tabId} moved from ${moveInfo.fromIndex} to ${moveInfo.toIndex}`);
   }
   onTabCreated(tab) {
-    // console.log(`onTabCreated: Tab ${tab.id}, ${tab.url}`);
+    // console.log(`onTabCreated: Tab ${tab.id}, ${tab.url}, opener ${tab.openerTabId}`);
     this.currentTabs[tab.id] = tab;
     this.history[tab.id] = new visit.Visit({
       title: tab.title,
       url: tab.url,
-      status: tab.status
+      status: tab.status,
     });
     // console.log(this.history[tab.id].serializeJson());
     if (tab.url != "about:blank" && tab.url != "about:newtab") {

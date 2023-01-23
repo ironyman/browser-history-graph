@@ -18,7 +18,6 @@ let Storage = {
       store.createIndex("date", "date");
     };
 
-
     return new Promise(resolve => {
       request.onsuccess = e => {
         DB = request.result;
