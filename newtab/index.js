@@ -79,9 +79,9 @@ async function main() {
         if (!Number.isNaN(event.transform.y)) {
           transform.y = -event.transform.y;
         }
-        if (!Number.isNaN(event.transform.k)) {
-          transform.k = event.transform.k;
-        }
+        // if (!Number.isNaN(event.transform.k)) {
+        //   transform.k = event.transform.k;
+        // }
         if (transform.k < 1) {
           transform.k = 1;
         } else if (transform.k > 1.2) {
@@ -202,6 +202,7 @@ async function main() {
       .attr("y", function (d) { return transform.k*(d.y - transform.y); })
       .style("font-size", "20px").style("fill", "#4393c3");
 
+    // offset by half of width and height
     favicon
       .attr("x", function (d) { return transform.k*(d.x-12  - transform.x); })
       .attr("y", function (d) { return transform.k*(d.y-12  - transform.y); });
