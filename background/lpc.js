@@ -29,7 +29,7 @@ export function initLpc() {
       return true;
     } else if (message === 'get-recent-history') {
       let result = await Visit.getRecent();
-      console.log("get-recent-history got length of ", result.length);
+      // console.log("get-recent-history got length of ", result.length);
       // sendResponse({ result: result, test: "hi" });
       // Need to return true for sendResponse to work.
       return result;

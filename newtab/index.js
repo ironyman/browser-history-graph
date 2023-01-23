@@ -48,6 +48,8 @@ async function main() {
   let nodesMap = {};
   let width = 640;
   let height = 480;
+  let transform = { x: 0, y: 0, k: 1 };
+
   try {
     // compute nodes from links data
     history.forEach(function (visit) {
@@ -71,6 +73,21 @@ async function main() {
       .attr('height', height)
       .call(d3.zoom().on('zoom', function(event) {
         // console.log(event);
+        if (!Number.isNaN(event.transform.x)) {
+          transform.x = -event.transform.x;
+        }
+        if (!Number.isNaN(event.transform.y)) {
+          transform.y = -event.transform.y;
+        }
+        if (!Number.isNaN(event.transform.k)) {
+          transform.k = event.transform.k;
+        }
+        if (transform.k < 1) {
+          transform.k = 1;
+        } else if (transform.k > 1.2) {
+          transform.k = 1.2;
+        }
+
         // This is not the kind of pan we want, this moves the entire svg...
         // svg.attr("transform", event.transform);
         // svg.attr('transform', `translate(${event.transform.x}, ${event.transform.y}) scale(${event.transform.k})`);
@@ -167,27 +184,27 @@ async function main() {
 
   function ticked() {
     link
-      .attr("x1", function (d) { return d.source.x; })
-      .attr("y1", function (d) { return d.source.y; })
-      .attr("x2", function (d) { return d.target.x; })
-      .attr("y2", function (d) { return d.target.y; });
+      .attr("x1", function (d) { return transform.k*(d.source.x - transform.x); })
+      .attr("y1", function (d) { return transform.k*(d.source.y - transform.y); })
+      .attr("x2", function (d) { return transform.k*(d.target.x - transform.x); })
+      .attr("y2", function (d) { return transform.k*(d.target.y - transform.y); });
 
     node
       .attr("r", 20)
       .style("fill", "#d9d9d9")
       .style("stroke", "#969696")
       .style("stroke-width", "1px")
-      .attr("cx", function (d) { return d.x; })
-      .attr("cy", function (d) { return d.y; });
+      .attr("cx", function (d) { return transform.k*(d.x - transform.x); })
+      .attr("cy", function (d) { return transform.k*(d.y - transform.y); });
 
     label
-      .attr("x", function (d) { return d.x; })
-      .attr("y", function (d) { return d.y; })
+      .attr("x", function (d) { return transform.k*(d.x - transform.x); })
+      .attr("y", function (d) { return transform.k*(d.y - transform.y); })
       .style("font-size", "20px").style("fill", "#4393c3");
 
     favicon
-      .attr("x", function (d) { return d.x-12; })
-      .attr("y", function (d) { return d.y-12; });
+      .attr("x", function (d) { return transform.k*(d.x-12  - transform.x); })
+      .attr("y", function (d) { return transform.k*(d.y-12  - transform.y); });
   }
 
   //   var force = d3.layout.force() //build the layout
