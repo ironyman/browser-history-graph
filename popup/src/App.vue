@@ -1,47 +1,88 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+<!--
+A nested tree component that recursively renders itself.
+You can double click on an item to turn it into a folder.
+-->
+
+<script>
+import TreeItem from './Components/TreeItem.vue'
+
+const treeData = {
+  name: 'My Tree',
+  children: [
+    { name: 'hello' },
+    { name: 'wat' },
+    {
+      name: 'child folder',
+      children: [
+        {
+          name: 'child folder',
+          children: [{ name: 'hello' }, { name: 'wat' }]
+        },
+        { name: 'hello' },
+        { name: 'wat' },
+        {
+          name: 'child folder',
+          children: [{ name: 'hello' }, { name: 'wat' }]
+        }
+      ]
+    }
+  ]
+}
+
+export default {
+  components: {
+    TreeItem
+  },
+  methods: {
+    async getCurrentTabs() {
+    // let visits = await chrome.runtime.sendMessage('get-recent-history');
+    // console.log("response", visits.length);
+    return new Promise(resolve => {
+      browser.runtime.sendMessage('get-current-tabs', function (response) {
+        // console.log("response", response[0].url);
+        resolve(response);
+      });
+    });
+  },
+  },
+  mounted() {
+    this.getCurrentTabs().then(a => {
+      console.log(Object.keys(a.history).length);
+      for (let key in a) {
+        console.log("key", key);
+        for (let key2 in a[key]) {
+          console.log("key2", key2);
+          console.log(a[key][key2]);
+        }
+      }
+    });
+  },
+  data() {
+    return {
+      treeData
+    }
+  },
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  <div class="container">
+    <ul>
+      <TreeItem class="item" :model="treeData"></TreeItem>
+    </ul>
+  </div>
 </template>
 
-<style scoped>
-header {
+<style>
+.container {
+  min-width: 400px;
+  /* min-height: 800px; */
+}
+.item {
+  cursor: pointer;
   line-height: 1.5;
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.bold {
+  font-weight: bold;
 }
 </style>

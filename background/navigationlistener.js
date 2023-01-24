@@ -15,7 +15,9 @@ export class NavigationListener {
     this.history = {};
 
     // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab
-
+    browser.tabs.query({}).then(function(tabs) {
+      tabs.forEach(this.onTabCreated.bind(this));
+    }.bind(this));
     browser.tabs.onActivated.addListener(this.onTabActivated.bind(this));
     browser.tabs.onUpdated.addListener(this.onTabUpdated.bind(this));
     browser.tabs.onRemoved.addListener(this.onTabRemoved.bind(this));

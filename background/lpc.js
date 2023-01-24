@@ -1,6 +1,6 @@
 import { Visit } from './visit.js';
 import Storage from "./storage.js";
-export function initLpc() {
+export function initLpc(navigationListener) {
   browser.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
     // console.log("background received message", message);
     if (message === 'clickme') {
@@ -33,6 +33,12 @@ export function initLpc() {
       // sendResponse({ result: result, test: "hi" });
       // Need to return true for sendResponse to work.
       return result;
+    } else if (message === 'get-current-tabs') {
+      console.log(Object.keys(navigationListener.history).length)
+      return {
+        currentTabs: navigationListener.currentTabs,
+        history: navigationListener.history,
+      };
     }
   });
 }

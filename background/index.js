@@ -6,7 +6,7 @@ async function main() {
   console.log("Starting history-graph");
   await Storage.init();
   let nav = new NavigationListener();
-  initLpc();
+  initLpc(nav);
 }
 
 main();
