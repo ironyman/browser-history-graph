@@ -10,7 +10,9 @@
   "browser_action": {
     "default_icon": {},
     "default_title": "Popup",
-    "default_popup": "browserAction/popup.html"
+    "default_popup": "popup/dist/index.html",
+    "browser_style": true,
+    "default_area": "tabstrip"
   },
   "content_scripts": [
     {
