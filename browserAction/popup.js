@@ -7,7 +7,6 @@ chrome.runtime.sendMessage('get-current-theme', function (theme) {
       // `border: 3px solid ${theme.colors.popup_border}`,
     ];
     document.body.setAttribute('style', colors.join(';'));
-
   }
 });
 

@@ -6,28 +6,52 @@ You can double click on an item to turn it into a folder.
 <script>
 import TreeItem from './Components/TreeItem.vue'
 
-const treeData = {
-  name: 'My Tree',
-  children: [
-    { name: 'hello' },
-    { name: 'wat' },
-    {
-      name: 'child folder',
-      children: [
-        {
-          name: 'child folder',
-          children: [{ name: 'hello' }, { name: 'wat' }]
-        },
-        { name: 'hello' },
-        { name: 'wat' },
-        {
-          name: 'child folder',
-          children: [{ name: 'hello' }, { name: 'wat' }]
-        }
-      ]
-    }
-  ]
-}
+const treeData = [
+  {
+    name: 'My Tree',
+    children: [
+      { name: 'hello' },
+      { name: 'wat' },
+      {
+        name: 'child folder',
+        children: [
+          {
+            name: 'child folder',
+            children: [{ name: 'hello' }, { name: 'wat' }]
+          },
+          { name: 'hello' },
+          { name: 'wat' },
+          {
+            name: 'child folder',
+            children: [{ name: 'hello' }, { name: 'wat' }]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'My Tree',
+    children: [
+      { name: 'hello' },
+      { name: 'wat' },
+      {
+        name: 'child folder',
+        children: [
+          {
+            name: 'child folder',
+            children: [{ name: 'hello' }, { name: 'wat' }]
+          },
+          { name: 'hello' },
+          { name: 'wat' },
+          {
+            name: 'child folder',
+            children: [{ name: 'hello' }, { name: 'wat' }]
+          }
+        ]
+      }
+    ]
+  }
+];
 
 export default {
   components: {
@@ -35,15 +59,15 @@ export default {
   },
   methods: {
     async getCurrentTabs() {
-    // let visits = await chrome.runtime.sendMessage('get-recent-history');
-    // console.log("response", visits.length);
-    return new Promise(resolve => {
-      browser.runtime.sendMessage('get-current-tabs', function (response) {
-        // console.log("response", response[0].url);
-        resolve(response);
+      // let visits = await chrome.runtime.sendMessage('get-recent-history');
+      // console.log("response", visits.length);
+      return new Promise(resolve => {
+        browser.runtime.sendMessage('get-current-tabs', function (response) {
+          // console.log("response", response[0].url);
+          resolve(response);
+        });
       });
-    });
-  },
+    },
   },
   mounted() {
     this.getCurrentTabs().then(a => {
@@ -68,7 +92,7 @@ export default {
 <template>
   <div class="container">
     <ul>
-      <TreeItem class="item" :model="treeData"></TreeItem>
+      <TreeItem class="item" v-for="tree in treeData" :model="tree"></TreeItem>
     </ul>
   </div>
 </template>
