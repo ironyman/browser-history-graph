@@ -114,9 +114,14 @@ export class NavigationListener {
     }
   }
   onTabRemoved(tabId, removeInfo) {
-    // console.log(`onTabRemoved: Tab: ${tabId} is closing`);
-    // console.log(`onTabRemoved: Window ID: ${removeInfo.windowId}`);
+    console.log(`onTabRemoved: Tab: ${tabId} is closing`);
+    console.log(`onTabRemoved: Window ID: ${removeInfo.windowId}`);
     // console.log(`onTabRemoved: Window is closing: ${removeInfo.isWindowClosing}`);
+    for (let id in this.currentTabs) {
+      if (this.currentTabs[id].openerTabId == tabId) {
+        this.currentTabs[id].openerTabId = this.currentTabs[tabId].openerTabId;
+      }
+    }
     delete this.currentTabs[tabId];
     delete this.history[tabId];
   }

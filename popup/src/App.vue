@@ -70,30 +70,66 @@ export default {
     },
   },
   mounted() {
-    this.getCurrentTabs().then(a => {
-      console.log(Object.keys(a.history).length);
-      for (let key in a) {
-        console.log("key", key);
-        for (let key2 in a[key]) {
-          console.log("key2", key2);
-          console.log(a[key][key2]);
+    this.getCurrentTabs().then(navState => {
+      // console.log(Object.keys(navState.history).length);
+      // for (let key in navState) {
+      // console.log("key", key);
+      //   for (let key2 in navState[key]) {
+      //     console.log("key2", key2);
+      //     console.log(navState[key][key2]);
+      //   }
+      // }
+
+      this.navState = navState;
+      let nodesMap = {};
+
+      for (let tabId in navState.currentTabs) {
+        let tab = navState.currentTabs[tabId];
+        nodesMap[tab.id] = {
+          id: tab.id,
+          name: tab.title,
+          openerTabId: tab.openerTabId,
+          children: [],
+        };
+        console.log(`adding ${tab.id} opened from ${tab.openerTabId}`);
+      }
+
+      for (let tabId in nodesMap) {
+        let current = nodesMap[tabId];
+        let parentId = current.openerTabId;
+        if (nodesMap.hasOwnProperty(parentId)) {
+          console.log(`reparenting ${tabId}`);
+          nodesMap[parentId].children.push(current);
         }
       }
+
+      // Delete after reparenting because if we delete while reparenting
+      // we can't reparent if we already deleted (reparented) the the node we need to
+      // reparent to.
+      for (let tabId in nodesMap) {
+        if (nodesMap[tabId].openerTabId) {
+          delete nodesMap[tabId];
+        }
+      }
+
+      this.tabForest = Object.values(nodesMap);
     });
   },
   data() {
     return {
-      treeData
+      treeData,
+      navState: {},
+      tabForest: {},
     }
   },
 }
 </script>
 
 <template>
-  <div class="container">
+  <div class="container tree">
     <input id="query" autofocus type="text"/>
     <ul>
-      <TreeItem class="item" v-for="tree in treeData" :model="tree"></TreeItem>
+      <TreeItem class="item" v-for="tree in tabForest" :model="tree"></TreeItem>
     </ul>
   </div>
 </template>
@@ -116,9 +152,11 @@ export default {
 
 .item {
   cursor: pointer;
-  line-height: 1.5;
 }
 .bold {
   font-weight: bold;
 }
+
+
+
 </style>
