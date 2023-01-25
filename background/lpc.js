@@ -34,11 +34,20 @@ export function initLpc(navigationListener) {
       // Need to return true for sendResponse to work.
       return result;
     } else if (message === 'get-current-tabs') {
-      console.log(Object.keys(navigationListener.history).length)
+      // console.log(Object.keys(navigationListener.history).length)
       return {
         currentTabs: navigationListener.currentTabs,
         history: navigationListener.history,
       };
+    } else if (message.command === 'show-tab') {
+      console.log(message.tabId);
+      try {
+        browser.tabs.update(message.tabId, {
+          active: true
+        });
+      } catch (e) {
+        console.log(e.toString())
+      }
     }
   });
 }

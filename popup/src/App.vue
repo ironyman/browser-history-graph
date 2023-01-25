@@ -4,58 +4,11 @@ You can double click on an item to turn it into a folder.
 -->
 
 <script>
-import TreeItem from './Components/TreeItem.vue'
-
-const treeData = [
-  {
-    name: 'My Tree',
-    children: [
-      { name: 'hello' },
-      { name: 'wat' },
-      {
-        name: 'child folder',
-        children: [
-          {
-            name: 'child folder',
-            children: [{ name: 'hello' }, { name: 'wat' }]
-          },
-          { name: 'hello' },
-          { name: 'wat' },
-          {
-            name: 'child folder',
-            children: [{ name: 'hello' }, { name: 'wat' }]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'My Tree',
-    children: [
-      { name: 'hello' },
-      { name: 'wat' },
-      {
-        name: 'child folder',
-        children: [
-          {
-            name: 'child folder',
-            children: [{ name: 'hello' }, { name: 'wat' }]
-          },
-          { name: 'hello' },
-          { name: 'wat' },
-          {
-            name: 'child folder',
-            children: [{ name: 'hello' }, { name: 'wat' }]
-          }
-        ]
-      }
-    ]
-  }
-];
+import TabTreeItem from './Components/TabTreeItem.vue'
 
 export default {
   components: {
-    TreeItem
+    TabTreeItem
   },
   methods: {
     async getCurrentTabs() {
@@ -88,17 +41,18 @@ export default {
         nodesMap[tab.id] = {
           id: tab.id,
           name: tab.title,
+          faviconUrl: navState.history[tabId].faviconUrl,
           openerTabId: tab.openerTabId,
           children: [],
         };
-        console.log(`adding ${tab.id} opened from ${tab.openerTabId}`);
+        // console.log(`adding ${tab.id} opened from ${tab.openerTabId}`);
       }
 
       for (let tabId in nodesMap) {
         let current = nodesMap[tabId];
         let parentId = current.openerTabId;
         if (nodesMap.hasOwnProperty(parentId)) {
-          console.log(`reparenting ${tabId}`);
+          // console.log(`reparenting ${tabId}`);
           nodesMap[parentId].children.push(current);
         }
       }
@@ -117,7 +71,6 @@ export default {
   },
   data() {
     return {
-      treeData,
       navState: {},
       tabForest: {},
     }
@@ -126,19 +79,31 @@ export default {
 </script>
 
 <template>
-  <div class="container tree">
-    <input id="query" autofocus type="text"/>
-    <ul>
-      <TreeItem class="item" v-for="tree in tabForest" :model="tree"></TreeItem>
-    </ul>
+  <div class="container">
+    <input id="query" autofocus type="text" placeholder="Search here"/>
+    <div class="tree">
+      <ul>
+        <TabTreeItem class="item" v-for="tree in tabForest" :model="tree"></TabTreeItem>
+      </ul>
+    </div>
   </div>
 </template>
 
 <style>
 .container {
-  min-width: 400px;
-  /* min-height: 800px; */
+  width: 600px;
+  height: 400px;
+  display: flex;
+  flex: 10px auto;
+  flex-direction: column;
+  overflow: hidden;
 }
+
+.tree {
+  overflow-y: scroll;
+  height: 100%;
+}
+
 #query {
   width: 100%;
   height: 12pt;
@@ -146,6 +111,8 @@ export default {
   color: white;
   border: none;
   outline:none;
+  padding: 10px;
+  margin: 10px;
 }
 #email:focus {
 }
