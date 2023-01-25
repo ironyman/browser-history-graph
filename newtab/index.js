@@ -33,9 +33,31 @@ async function setBackground() {
   // this.context.fillStyle = (window.matchMedia('(prefers-color-scheme: dark)').matches ? "#f2f3f4" : "#606368");
 }
 
-function urlToDomain(url) {
-  if (!url || url == "about:newtab" || url == "about:blank" || url == document.location.href) return "Home";
-  return (new URL(url)).hostname;
+function urlToDomain(urlString) {
+  if (!urlString ||
+    urlString == "about:newtab" ||
+    urlString == "about:blank" ||
+    urlString.startsWith(document.location.href) ||
+    urlString.startsWith(new URL(document.location.href).hostname)
+  )
+    return "Home";
+  let url;
+  try {
+    url = new URL(urlString);
+  } catch (e) {
+    return urlString;
+  }
+
+  if (!url.hostname) {
+    // Some urls look like this, not really url
+    // a = new URL('view-source:moz-extension://6987f6c0-eb29-4563-99c6-4dc9e648dcdf/popup/dist/index.html')
+    // URL { href: "view-source:moz-extension://6987f6c0-eb29-4563-99c6-4dc9e648dcdf/popup/dist/index.html",
+    // origin: "moz-extension://6987f6c0-eb29-4563-99c6-4dc9e648dcdf", protocol: "view-source:", username: "",
+    // password: "", host: "", hostname: "", port: "",
+    // pathname: "moz-extension://6987f6c0-eb29-4563-99c6-4dc9e648dcdf/popup/dist/index.html", search: "" }
+    return urlToDomain(url.pathname);
+  }
+  return url.hostname;
 }
 
 async function main() {
@@ -61,9 +83,9 @@ async function main() {
       let domain = urlToDomain(visit.url);
 
       visit.source = nodesMap[fromDomain] ||
-        (nodesMap[fromDomain] = { id: fromDomain, title: fromDomain, icon: `https://${fromDomain}/favicon.ico` });
+        (nodesMap[fromDomain] = { id: fromDomain, title: fromDomain, icon: `https://${fromDomain}/favicon.ico`, visitId: visit.id });
       visit.target = nodesMap[domain] ||
-        (nodesMap[domain] = { id: domain, title: domain, icon: `https://${domain}/favicon.ico` });
+        (nodesMap[domain] = { id: domain, title: domain, icon: `https://${domain}/favicon.ico`, visitId: visit.id });
     });
     let nodes = Object.values(nodesMap);
 
@@ -112,6 +134,8 @@ async function main() {
       .data(nodes)
       .enter()
       .append("circle")
+      // Title doesn't actually display on hover for circle.. just look at source
+      // .attr('title', d => d.visitId)
       .call(d3.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
@@ -124,6 +148,7 @@ async function main() {
       .enter().append("image")
       .attr('width', 24)
       .attr('height', 24)
+      .attr('title', d => d.visitId)
       .attr("xlink:href", function(d) {
         return d.icon;
       })
