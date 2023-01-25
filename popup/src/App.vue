@@ -91,6 +91,7 @@ export default {
 
 <template>
   <div class="container">
+    <input id="query" autofocus type="text"/>
     <ul>
       <TreeItem class="item" v-for="tree in treeData" :model="tree"></TreeItem>
     </ul>
@@ -102,6 +103,17 @@ export default {
   min-width: 400px;
   /* min-height: 800px; */
 }
+#query {
+  width: 100%;
+  height: 12pt;
+  background-color:rgba(0, 0, 0, 0);
+  color: white;
+  border: none;
+  outline:none;
+}
+#email:focus {
+}
+
 .item {
   cursor: pointer;
   line-height: 1.5;

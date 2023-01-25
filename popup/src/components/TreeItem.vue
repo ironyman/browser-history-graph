@@ -59,3 +59,12 @@ export default {
     </ul>
   </li>
 </template>
+<style>
+ul {
+  list-style: none;
+  padding: 5px;
+}
+li {
+  padding-left: 0;
+}
+</style>
