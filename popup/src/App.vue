@@ -305,7 +305,7 @@ export default {
   <div @keydown="onBodyKeyDown" id="container">
     <input id="query" autofocus type="text" placeholder="Search tabs" v-model="queryString" />
     <div id="forest" tabindex="-1">
-      <ul>
+      <ul style="padding-left: 0">
         <TabTreeItem class="item" v-for="tree in tabForest.children" :model="tree" :selectedNode="selectedNode"></TabTreeItem>
       </ul>
     </div>
