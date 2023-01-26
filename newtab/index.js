@@ -60,6 +60,34 @@ function urlToDomain(urlString) {
   return url.hostname;
 }
 
+
+function urlToDomainUrl(urlString) {
+  if (!urlString ||
+    urlString == "about:newtab" ||
+    urlString == "about:blank" ||
+    urlString.startsWith(document.location.href) ||
+    urlString.startsWith(new URL(document.location.href).hostname)
+  )
+    return undefined;
+  let url;
+  try {
+    url = new URL(urlString);
+  } catch (e) {
+    return urlString;
+  }
+
+  if (!url.hostname) {
+    // Some urls look like this, not really url
+    // a = new URL('view-source:moz-extension://6987f6c0-eb29-4563-99c6-4dc9e648dcdf/popup/dist/index.html')
+    // URL { href: "view-source:moz-extension://6987f6c0-eb29-4563-99c6-4dc9e648dcdf/popup/dist/index.html",
+    // origin: "moz-extension://6987f6c0-eb29-4563-99c6-4dc9e648dcdf", protocol: "view-source:", username: "",
+    // password: "", host: "", hostname: "", port: "",
+    // pathname: "moz-extension://6987f6c0-eb29-4563-99c6-4dc9e648dcdf/popup/dist/index.html", search: "" }
+    return urlToDomainUrl(url.pathname);
+  }
+  return url.hostname;
+}
+
 async function main() {
   setBackground();
   // let a = browser.runtime.getManifest();
@@ -81,11 +109,25 @@ async function main() {
       //   (nodesMap[visit.id] = { id: visit.id });
       let fromDomain = urlToDomain(visit.fromUrl);
       let domain = urlToDomain(visit.url);
+      let fromUrl = urlToDomainUrl(visit.fromUrl);
+      let url = urlToDomainUrl(visit.url);
 
       visit.source = nodesMap[fromDomain] ||
-        (nodesMap[fromDomain] = { id: fromDomain, title: fromDomain, icon: `https://${fromDomain}/favicon.ico`, visitId: visit.id });
+        (nodesMap[fromDomain] = {
+          id: fromDomain,
+          title: fromDomain,
+          url: fromUrl,
+          icon: `https://${fromDomain}/favicon.ico`,
+          visitId: visit.id
+        });
       visit.target = nodesMap[domain] ||
-        (nodesMap[domain] = { id: domain, title: domain, icon: `https://${domain}/favicon.ico`, visitId: visit.id });
+        (nodesMap[domain] = {
+          id: domain,
+          title: domain,
+          url: url,
+          icon: `https://${domain}/favicon.ico`,
+          visitId: visit.id
+        });
     });
     let nodes = Object.values(nodesMap);
 
@@ -136,6 +178,11 @@ async function main() {
       .append("circle")
       // Title doesn't actually display on hover for circle.. just look at source
       // .attr('title', d => d.visitId)
+      .on('click', (event, d) => {
+        // console.log(event, d);
+        if (d.url)
+          location.href = 'https://' + d.url;
+      })
       .call(d3.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
