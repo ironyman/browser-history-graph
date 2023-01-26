@@ -153,7 +153,7 @@ export default {
             return true;
           }
           if (findAncestors(child)) {
-            console.log("found ancestor", current.id)
+            // console.log("found ancestor", current.id)
             if (current.isClosed) {
               isClosed = true;
             }
@@ -192,7 +192,7 @@ export default {
         let selected = document.querySelector('.selected');
         let container = document.querySelector('#forest');
 
-        if (selected && !this.isScrolledIntoView(selected, container, true))
+        if (selected && !this.isElementVisible(selected, container, true))
           selected.scrollIntoView();
       }, 100);
     },
@@ -213,6 +213,17 @@ export default {
       // Not a real tree node, remove the member.
       delete this.tabForest.filteredOut;
     },
+    isElementVisible (el, holder, partialTest) {
+      holder = holder || document.body
+      const { top, bottom, height } = el.getBoundingClientRect()
+      const holderRect = holder.getBoundingClientRect()
+
+      console.log(top, bottom, height);
+
+      return top <= holderRect.top
+          ? holderRect.top <= bottom && top > holderRect.bottom
+          : top <= holderRect.bottom && bottom < holderRect.bottom;
+    },
     isScrolledIntoView(el, container, partialTest) {
       // let rect = el.getBoundingClientRect();
       // let elemTop = rect.top;
@@ -228,14 +239,14 @@ export default {
       let cTop = container.scrollTop;
       let cBottom = cTop + container.clientHeight;
       //Get el properties
-      // let eTop = el.offsetTop; // this is always 0
-      // let eBottom = eTop + el.clientHeight;
-
-      let rect  = el.getBoundingClientRect();
-      let eTop = rect.top;
+      let eTop = el.offsetTop; // this is always 0
       let eBottom = eTop + el.clientHeight;
 
-      // console.log(cTop, cBottom, eTop, eBottom);
+      // let rect  = el.getBoundingClientRect();
+      // let eTop = rect.top;
+      // let eBottom = eTop + el.clientHeight;
+
+      console.log(cTop, cBottom, eTop, eBottom);
       // return eBottom > cBottom || eTop < cTop;
       //Check if in view
       partialTest = true;
@@ -251,7 +262,7 @@ export default {
   },
   watch: {
     queryString: function(newQueryString, oldQueryString) {
-      console.log(this.queryString);
+      // console.log(this.queryString);
       function markFiltered(current, filter) {
         if (!current) return undefined;
         for (let child of current.children) {
@@ -356,7 +367,12 @@ export default {
 
 #forest {
   overflow-y: scroll;
-  height: 100%;
+  /* element.offsetLeft and element.offsetTop give an element's position with respect to its offsetParent (which is the nearest parent element with a position of relative or absolute.)
+  use relative so we can get offsetTop to work
+  actually this doesn't even work.
+  */
+  /* position: relative; */
+  /* height: 100%; */
 }
 
 #query {

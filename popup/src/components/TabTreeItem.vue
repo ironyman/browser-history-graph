@@ -72,7 +72,7 @@ ul {
 }
 
 li {
-  position: relative;
+  /* position: relative; */
   padding-left: 0;
 }
 
