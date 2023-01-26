@@ -4,6 +4,10 @@ export default {
   props: {
     model: Object,
     selectedNode: Object,
+    depth: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -39,7 +43,12 @@ export default {
   <li>
     <div class="list-name" :class="{ 'selected': model == selectedNode, 'filtered-out': model.filteredOut }"
       @click.self="openTab">
-      <span class="toggle" @click="toggle" v-if="isFolder">{{ isOpen? '-': '+' }}</span>
+      <span class="toggle" @click="toggle" v-if="isFolder">{{ '&nbsp'.repeat(depth*2) + (isOpen ? '-': '+') }}</span>
+      <!-- This is more flush but parents are lined up with children -->
+      <!-- <span class="toggle" v-else="isFolder">{{ '&nbsp'.repeat(depth*2 > 1 ? depth*2 - 1 : depth*2) }}</span> -->
+      <!-- This takes up more space but parents and children are distinguished -->
+      <span class="toggle" v-else="isFolder">{{ '&nbsp'.repeat(depth*2 + 1) }}</span>
+
       {{ model.name }}
     </div>
     <ul tabindex="-1" v-show="isOpen" v-if="isFolder">
@@ -47,7 +56,7 @@ export default {
         A component can recursively render itself using its
         "name" option (inferred from filename if using SFC)
       -->
-      <TabTreeItem class="item" v-for="model in model.children" :selectedNode="selectedNode" :model="model">
+      <TabTreeItem class="item" v-for="model in model.children" :selectedNode="selectedNode" :model="model" :depth="depth+1">
       </TabTreeItem>
     </ul>
   </li>
@@ -55,7 +64,7 @@ export default {
 <style>
 ul {
   list-style: none;
-  padding-left: 14px;
+  padding-left: 0px;
   list-style-position: inside;
 }
 
@@ -68,6 +77,7 @@ li {
 
 li div.list-name {
   padding: 2px 8px 2px 8px;
+  /* font-family: monospace; */
 }
 
 li div.list-name.selected,
@@ -78,18 +88,6 @@ li div.list-name:hover {
 
 .toggle {
   font-family: monospace;
-}
-
-li::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  width: 1px;
-  height: 100%;
-  right: auto;
-  left: -20px;
-  border-left: 1px solid #ccc;
-  bottom: 50px;
 }
 
 .filtered-out {
