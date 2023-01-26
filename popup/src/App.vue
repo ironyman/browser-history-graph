@@ -131,15 +131,39 @@ export default {
     },
     prevFilteredTreeNode() {
       this.prevTreeNode();
-      while (this.selectedNode && this.selectedNode.filteredOut) {
+      while (this.selectedNode && (this.selectedNode.filteredOut || this.isNodeClosed(this.selectedNode))) {
         this.prevTreeNode();
       }
     },
     nextFilteredTreeNode() {
       this.nextTreeNode();
-      while (this.selectedNode && this.selectedNode.filteredOut) {
+      while (this.selectedNode && (this.selectedNode.filteredOut || this.isNodeClosed(this.selectedNode))) {
         this.nextTreeNode();
       }
+    },
+    isNodeClosed(node) {
+      let isClosed = false;
+      function findAncestors(current) {
+        if (!current) return false;
+        for (let child of current.children) {
+          if (child == node) {
+            if (current.isClosed) {
+              isClosed = true;
+            }
+            return true;
+          }
+          if (findAncestors(child)) {
+            console.log("found ancestor", current.id)
+            if (current.isClosed) {
+              isClosed = true;
+            }
+            return true;
+          }
+        }
+      }
+
+      findAncestors(this.tabForest);
+      return isClosed;
     },
     onBodyKeyDown(event) {
       // console.log('Key', event.key)
@@ -148,6 +172,14 @@ export default {
         this.nextFilteredTreeNode();
       } else if (event.key == 'ArrowUp') {
         this.prevFilteredTreeNode();
+      } else if (event.key == 'ArrowLeft') {
+        if (this.selectedNode) {
+          if (this.selectedNode.isClosed) {
+            delete this.selectedNode.isClosed;
+          } else {
+            this.selectedNode.isClosed = true;
+          }
+        }
       } else if (event.key == 'Enter') {
         if (this.selectedNode) {
           browser.tabs.update(this.selectedNode.id, {

@@ -17,7 +17,10 @@ export default {
   computed: {
     isFolder() {
       return this.model.children && this.model.children.length
-    }
+    },
+    isOpen2() {
+      return this.isOpen && !this.model.isClosed;
+    },
   },
   methods: {
     toggle() {
@@ -43,7 +46,7 @@ export default {
   <li>
     <div class="list-name" :class="{ 'selected': model == selectedNode, 'filtered-out': model.filteredOut }"
       @click.self="openTab">
-      <span class="toggle" @click="toggle" v-if="isFolder">{{ '&nbsp'.repeat(depth) + (isOpen ? '-': '+') }}</span>
+      <span class="toggle" @click="toggle" v-if="isFolder">{{ '&nbsp'.repeat(depth) + (isOpen2 ? '-': '+') }}</span>
       <!-- This is more flush but parents are lined up with children -->
       <!-- <span class="toggle" v-else="isFolder">{{ '&nbsp'.repeat(depth*2 > 1 ? depth*2 - 1 : depth*2) }}</span> -->
       <!-- This takes up more space but parents and children are distinguished -->
@@ -51,7 +54,7 @@ export default {
 
       {{ model.name }}
     </div>
-    <ul tabindex="-1" v-show="isOpen" v-if="isFolder">
+    <ul tabindex="-1" v-show="isOpen2" v-if="isFolder">
       <!--
         A component can recursively render itself using its
         "name" option (inferred from filename if using SFC)
