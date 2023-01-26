@@ -21,10 +21,13 @@ export default {
       }
     },
     openTab() {
-      browser.runtime.sendMessage({
-        command: 'show-tab',
-        tabId: this.model.id,
+      browser.tabs.update(this.model.id, {
+        active: true
       });
+        // browser.runtime.sendMessage({
+        //   command: 'show-tab',
+        //   tabId: this.model.id,
+        // });
       window.close();
     }
   }
@@ -33,7 +36,7 @@ export default {
 
 <template>
   <li>
-    <div @click.self="openTab">
+    <div class="list-name" @click.self="openTab">
       <span @click="toggle" v-if="isFolder">[{{ isOpen ? '-' : '+' }}]</span>
       {{ model.name }}
     </div>
@@ -61,5 +64,14 @@ li {
   overflow: hidden;
   text-overflow: ellipsis;
   padding-left: 0;
+}
+
+li div.list-name {
+  padding: 2px 8px 2px 8px;
+}
+
+li div.list-name.selected, li div.list-name:hover {
+  background-color: var(--popup_highlight);
+  border-radius: 3px;
 }
 </style>

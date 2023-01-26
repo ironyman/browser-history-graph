@@ -108,17 +108,19 @@ export default {
   width: 100%;
   height: 12pt;
   background-color:rgba(0, 0, 0, 0);
-  color: white;
+  /* color: white; */
+  color: var(--text);
   border: none;
-  outline:none;
+  outline: none;
   padding: 10px;
   margin: 10px;
 }
+
 #email:focus {
 }
 
 .item {
-  cursor: pointer;
+  /* cursor: pointer; */
 }
 .bold {
   font-weight: bold;
