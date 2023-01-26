@@ -25,10 +25,10 @@ export default {
       browser.tabs.update(this.model.id, {
         active: true
       });
-        // browser.runtime.sendMessage({
-        //   command: 'show-tab',
-        //   tabId: this.model.id,
-        // });
+      // browser.runtime.sendMessage({
+      //   command: 'show-tab',
+      //   tabId: this.model.id,
+      // });
       window.close();
     }
   }
@@ -37,20 +37,17 @@ export default {
 
 <template>
   <li>
-    <div class="list-name" :class="{ 'selected' : model == selectedNode }" @click.self="openTab">
-      <span class="toggle" @click="toggle" v-if="isFolder">{{ isOpen ? '-' : '+' }}</span>
+    <div class="list-name" :class="{ 'selected': model == selectedNode, 'filtered-out': model.filteredOut }"
+      @click.self="openTab">
+      <span class="toggle" @click="toggle" v-if="isFolder">{{ isOpen? '-': '+' }}</span>
       {{ model.name }}
     </div>
-    <ul v-show="isOpen" v-if="isFolder">
+    <ul tabindex="-1" v-show="isOpen" v-if="isFolder">
       <!--
         A component can recursively render itself using its
         "name" option (inferred from filename if using SFC)
       -->
-      <TabTreeItem
-        class="item"
-        v-for="model in model.children"
-        :selectedNode="selectedNode"
-        :model="model">
+      <TabTreeItem class="item" v-for="model in model.children" :selectedNode="selectedNode" :model="model">
       </TabTreeItem>
     </ul>
   </li>
@@ -61,6 +58,7 @@ ul {
   padding-left: 14px;
   list-style-position: inside;
 }
+
 li {
   white-space: nowrap;
   overflow: hidden;
@@ -72,7 +70,8 @@ li div.list-name {
   padding: 2px 8px 2px 8px;
 }
 
-li div.list-name.selected, li div.list-name:hover {
+li div.list-name.selected,
+li div.list-name:hover {
   background-color: var(--popup_highlight);
   border-radius: 3px;
 }
@@ -81,7 +80,7 @@ li div.list-name.selected, li div.list-name:hover {
   font-family: monospace;
 }
 
- li::before {
+li::before {
   content: '';
   position: absolute;
   top: 0;
@@ -91,5 +90,9 @@ li div.list-name.selected, li div.list-name:hover {
   left: -20px;
   border-left: 1px solid #ccc;
   bottom: 50px;
+}
+
+.filtered-out {
+  display: none;
 }
 </style>

@@ -129,20 +129,114 @@ export default {
       // console.log("resetting");
       this.selectedNode = undefined;
     },
-    handleKey(event) {
+    prevFilteredTreeNode() {
+      this.prevTreeNode();
+      while (this.selectedNode && this.selectedNode.filteredOut) {
+        this.prevTreeNode();
+      }
+    },
+    nextFilteredTreeNode() {
+      this.nextTreeNode();
+      while (this.selectedNode && this.selectedNode.filteredOut) {
+        this.nextTreeNode();
+      }
+    },
+    onBodyKeyDown(event) {
       // console.log('Key', event.key)
 
       if (event.key == 'ArrowDown') {
-        this.nextTreeNode();
+        this.nextFilteredTreeNode();
       } else if (event.key == 'ArrowUp') {
-        this.prevTreeNode();
+        this.prevFilteredTreeNode();
       } else if (event.key == 'Enter') {
-        browser.tabs.update(this.selectedNode.id, {
-          active: true
-        });
-        window.close();
+        if (this.selectedNode) {
+          browser.tabs.update(this.selectedNode.id, {
+            active: true
+          });
+          window.close();
+        }
       }
-    }
+      setTimeout(() => {
+        let selected = document.querySelector('.selected');
+        let container = document.querySelector('#forest');
+
+        if (selected && !this.isScrolledIntoView(selected, container, true))
+          selected.scrollIntoView();
+      }, 100);
+    },
+    onQueryKeyDown(event) {
+      // console.log(this.queryString);
+      function markFiltered(current, filter) {
+        if (!current) return undefined;
+        for (let child of current.children) {
+          if (!child.name || !child.name.toLowerCase().includes(filter.toLowerCase())) {
+            child.filteredOut = true;
+          } else {
+            delete child.filteredOut;
+          }
+          markFiltered(child, filter);
+        }
+      }
+      markFiltered(this.tabForest, this.queryString);
+      // Not a real tree node, remove the member.
+      delete this.tabForest.filteredOut;
+    },
+    isScrolledIntoView(el, container, partialTest) {
+      // let rect = el.getBoundingClientRect();
+      // let elemTop = rect.top;
+      // let elemBottom = rect.bottom;
+
+      // // Only completely visible elements return true:
+      // let isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight);
+      // // Partially visible elements return true:
+      // //isVisible = elemTop < window.innerHeight && elemBottom >= 0;
+      // return isVisible;
+
+      //Get container properties
+      let cTop = container.scrollTop;
+      let cBottom = cTop + container.clientHeight;
+      //Get el properties
+      // let eTop = el.offsetTop; // this is always 0
+      // let eBottom = eTop + el.clientHeight;
+
+      let rect  = el.getBoundingClientRect();
+      let eTop = rect.top;
+      let eBottom = eTop + el.clientHeight;
+
+      // console.log(cTop, cBottom, eTop, eBottom);
+      // return eBottom > cBottom || eTop < cTop;
+      //Check if in view
+      partialTest = true;
+      let isTotal = (eTop >= cTop && eBottom <= cBottom);
+      let isPartial = partialTest && (
+        (eTop < cTop && eBottom > cTop) ||
+        (eBottom > cBottom && eTop < cBottom)
+      );
+
+      //Return outcome
+      return  (isTotal  || isPartial);
+    },
+  },
+  watch: {
+    queryString: function(newQueryString, oldQueryString) {
+      console.log(this.queryString);
+      function markFiltered(current, filter) {
+        if (!current) return undefined;
+        for (let child of current.children) {
+          if (!child.name || !child.name.toLowerCase().includes(filter.toLowerCase())) {
+            child.filteredOut = true;
+          } else {
+            delete child.filteredOut;
+          }
+          markFiltered(child, filter);
+        }
+      }
+      markFiltered(this.tabForest, this.queryString);
+      // Not a real tree node, remove the member.
+      delete this.tabForest.filteredOut;
+      this.selectedNode = undefined;
+      this.nextFilteredTreeNode();
+    },
   },
   mounted() {
     this.getCurrentTabs().then(navState => {
@@ -201,15 +295,16 @@ export default {
       navState: {},
       tabForest: {},
       selectedNode: undefined,
+      queryString: "",
     }
   },
 }
 </script>
-
+<!-- @keydown="onQueryKeyDown" -->
 <template>
-  <div @keyup="handleKey" id="container">
-    <input id="query" autofocus type="text" placeholder="Search here"/>
-    <div id="forest">
+  <div @keydown="onBodyKeyDown" id="container">
+    <input id="query" autofocus type="text" placeholder="Search tabs" v-model="queryString" />
+    <div id="forest" tabindex="-1">
       <ul>
         <TabTreeItem class="item" v-for="tree in tabForest.children" :model="tree" :selectedNode="selectedNode"></TabTreeItem>
       </ul>
@@ -243,8 +338,4 @@ export default {
   padding: 10px;
   margin: 10px;
 }
-
-
-
-
 </style>
