@@ -43,11 +43,11 @@ export default {
   <li>
     <div class="list-name" :class="{ 'selected': model == selectedNode, 'filtered-out': model.filteredOut }"
       @click.self="openTab">
-      <span class="toggle" @click="toggle" v-if="isFolder">{{ '&nbsp'.repeat(depth*2) + (isOpen ? '-': '+') }}</span>
+      <span class="toggle" @click="toggle" v-if="isFolder">{{ '&nbsp'.repeat(depth) + (isOpen ? '-': '+') }}</span>
       <!-- This is more flush but parents are lined up with children -->
       <!-- <span class="toggle" v-else="isFolder">{{ '&nbsp'.repeat(depth*2 > 1 ? depth*2 - 1 : depth*2) }}</span> -->
       <!-- This takes up more space but parents and children are distinguished -->
-      <span class="toggle" v-else="isFolder">{{ '&nbsp'.repeat(depth*2 + 1) }}</span>
+      <span class="toggle" v-else="isFolder">{{ '&nbsp'.repeat(depth + 1) }}</span>
 
       {{ model.name }}
     </div>
@@ -69,14 +69,15 @@ ul {
 }
 
 li {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  position: relative;
   padding-left: 0;
 }
 
 li div.list-name {
   padding: 2px 8px 2px 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
   /* font-family: monospace; */
 }
 
