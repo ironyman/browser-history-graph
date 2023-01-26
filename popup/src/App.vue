@@ -21,6 +21,9 @@ export default {
         });
       });
     },
+    handleKey(event) {
+      console.log(event);
+    }
   },
   mounted() {
     this.getCurrentTabs().then(navState => {
@@ -79,9 +82,9 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <div @keyup="handleKey" id="container">
     <input id="query" autofocus type="text" placeholder="Search here"/>
-    <div class="tree">
+    <div id="forest">
       <ul>
         <TabTreeItem class="item" v-for="tree in tabForest" :model="tree"></TabTreeItem>
       </ul>
@@ -90,7 +93,7 @@ export default {
 </template>
 
 <style>
-.container {
+#container {
   width: 600px;
   height: 400px;
   display: flex;
@@ -99,7 +102,7 @@ export default {
   overflow: hidden;
 }
 
-.tree {
+#forest {
   overflow-y: scroll;
   height: 100%;
 }
@@ -116,15 +119,6 @@ export default {
   margin: 10px;
 }
 
-#email:focus {
-}
-
-.item {
-  /* cursor: pointer; */
-}
-.bold {
-  font-weight: bold;
-}
 
 
 
