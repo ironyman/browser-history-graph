@@ -2,7 +2,8 @@
 export default {
   name: 'TabTreeItem', // necessary for self-reference
   props: {
-    model: Object
+    model: Object,
+    selectedNode: Object,
   },
   data() {
     return {
@@ -36,8 +37,8 @@ export default {
 
 <template>
   <li>
-    <div class="list-name" @click.self="openTab">
-      <span @click="toggle" v-if="isFolder">[{{ isOpen ? '-' : '+' }}]</span>
+    <div class="list-name" :class="{ 'selected' : model == selectedNode }" @click.self="openTab">
+      <span class="toggle" @click="toggle" v-if="isFolder">{{ isOpen ? '-' : '+' }}</span>
       {{ model.name }}
     </div>
     <ul v-show="isOpen" v-if="isFolder">
@@ -48,6 +49,7 @@ export default {
       <TabTreeItem
         class="item"
         v-for="model in model.children"
+        :selectedNode="selectedNode"
         :model="model">
       </TabTreeItem>
     </ul>
@@ -56,7 +58,7 @@ export default {
 <style>
 ul {
   list-style: none;
-  padding: 5px;
+  padding-left: 14px;
   list-style-position: inside;
 }
 li {
@@ -73,5 +75,21 @@ li div.list-name {
 li div.list-name.selected, li div.list-name:hover {
   background-color: var(--popup_highlight);
   border-radius: 3px;
+}
+
+.toggle {
+  font-family: monospace;
+}
+
+ li::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  right: auto;
+  left: -20px;
+  border-left: 1px solid #ccc;
+  bottom: 50px;
 }
 </style>

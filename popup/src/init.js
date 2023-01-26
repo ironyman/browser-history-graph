@@ -19,7 +19,15 @@ function initTheme() {
 
   function applyTheme(theme) {
     if (!theme.hasOwnProperty('colors') || !theme.colors) {
-      return;
+      // return;
+      theme = {
+        colors: {
+          popup: 'black',
+          popup_text: 'white',
+          popup_highlight: 'grey',
+          popup_highlight_text: 'white',
+        }
+      }
     }
 
     if (styleNode) {
