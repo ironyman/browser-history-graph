@@ -62,4 +62,13 @@ export class Visit {
 
     return Storage.queryDate(hourago.getTime(), now.getTime());
   }
+
+  static async getById(id) {
+    return Storage.get(id).then(res => new Visit(res));
+  }
+
+  static async getByFromId(fromId) {
+    return Storage.queryFromId(fromId);
+
+  }
 }

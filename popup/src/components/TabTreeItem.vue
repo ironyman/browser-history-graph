@@ -29,14 +29,16 @@ export default {
       }
     },
     openTab() {
-      browser.tabs.update(this.model.tabId, {
-        active: true
-      });
-      // browser.runtime.sendMessage({
-      //   command: 'show-tab',
-      //   tabId: this.model.tabId,
-      // });
-      window.close();
+      if (this.model.tabId) {
+        browser.tabs.update(this.model.tabId, {
+          active: true
+        });
+        // browser.runtime.sendMessage({
+        //   command: 'show-tab',
+        //   tabId: this.model.tabId,
+        // });
+        window.close();
+      }
     }
   }
 }

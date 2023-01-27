@@ -5,11 +5,13 @@ You can double click on an item to turn it into a folder.
 
 <script>
 import TabTreeItem from './components/TabTreeItem.vue'
+import HistoryView from './components/HistoryView.vue'
 import { mydump } from './debug.js';
 
 export default {
   components: {
-    TabTreeItem
+    TabTreeItem,
+    HistoryView,
   },
   methods: {
     async getCurrentTabs() {
@@ -182,12 +184,7 @@ export default {
         }
       } else if (event.key == 'ArrowRight') {
         if (this.selectedNode) {
-          // this.$router.push({
-          //   name: '/history',
-          //   params: {
-          //     visitId: this.selectedNode.visitId,
-          //   },
-          // });
+          this.toggleHistoryView();
         }
       } else if (event.key == 'Enter') {
         if (this.selectedNode) {
@@ -268,6 +265,14 @@ export default {
       //Return outcome
       return  (isTotal  || isPartial);
     },
+    toggleHistoryView() {
+      this.showHistoryView = !this.showHistoryView;
+      if (!this.showHistoryView) {
+        this.$refs.queryInput.focus();
+      } else {
+        // this.$refs.historyView.focus();
+      }
+    }
   },
   watch: {
     queryString: function(newQueryString, oldQueryString) {
@@ -349,6 +354,7 @@ export default {
       tabForest: {},
       selectedNode: undefined,
       queryString: "",
+      showHistoryView: false,
     }
   },
 }
@@ -356,12 +362,13 @@ export default {
 <!-- @keydown="onQueryKeyDown" -->
 <template>
   <div @keydown="onBodyKeyDown" id="container">
-    <input id="query" autofocus type="text" placeholder="Search tabs" v-model="queryString" />
+    <input id="query" ref="queryInput" autofocus type="text" placeholder="Search tabs" v-model="queryString" />
     <div id="forest" tabindex="-1">
       <ul style="padding-left: 0">
         <TabTreeItem class="item" v-for="tree in tabForest.children" :model="tree" :selectedNode="selectedNode"></TabTreeItem>
       </ul>
     </div>
+    <HistoryView v-if="showHistoryView" :visible="showHistoryView" :selectedNode="selectedNode" @close="toggleHistoryView"></HistoryView>
   </div>
 </template>
 

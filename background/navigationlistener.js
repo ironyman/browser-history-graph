@@ -70,13 +70,14 @@ export class NavigationListener {
           }
 
           let fromUrl = existingTab.url;
-
+          let fromId = existingVisit.id;
           // If this tab is opened by another tab, then we want to collapse the visits so that these
           // blank pages won't be a fromUrl
           if (fromUrl == "about:blank" || fromUrl == "about:newtab") {
             let previousTab = this.currentTabs[existingTab.openerTabId];
             if (previousTab) {
               fromUrl = previousTab.url;
+              fromId = previousTab.fromId;
             }
           }
 
@@ -91,7 +92,7 @@ export class NavigationListener {
             url: changeInfo.url,
             status: changeInfo.status,
             fromUrl: fromUrl,
-            fromId: existingVisit.id,
+            fromId: fromId,
           });
           console.log(this.history[tabId].serializeJson());
           this.history[tabId].save();
@@ -129,17 +130,17 @@ export class NavigationListener {
     // console.log(`onTabMoved: Tab ${tabId} moved from ${moveInfo.fromIndex} to ${moveInfo.toIndex}`);
   }
   onTabCreated(tab) {
-    // console.log(`onTabCreated: Tab ${tab.id}, ${tab.url}, opener ${tab.openerTabId}`);
     this.currentTabs[tab.id] = tab;
     this.history[tab.id] = new visit.Visit({
       title: tab.title,
       url: tab.url,
       status: tab.status,
     });
+    // console.log(`onTabCreated: Tab ${tab.id}, ${tab.url}, visitId ${this.history[tab.id].id} opener ${tab.openerTabId}`);
     // console.log(this.history[tab.id].serializeJson());
-    if (tab.url != "about:blank" && tab.url != "about:newtab") {
+    // if (tab.url != "about:blank" && tab.url != "about:newtab") {
       this.history[tab.id].save();
-    }
+    // }
   }
   // onBeforeNavigate(details) {
   //     console.log(`onBeforeNavigate to: ${details.url}`);

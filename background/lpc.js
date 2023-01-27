@@ -1,5 +1,7 @@
 import { Visit } from './visit.js';
 import Storage from "./storage.js";
+import { mydump } from "../lib/debug.js";
+
 export function initLpc(navigationListener) {
   browser.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
     // console.log("background received message", message);
@@ -40,7 +42,7 @@ export function initLpc(navigationListener) {
         history: navigationListener.history,
       };
     } else if (message.command === 'show-tab') {
-      console.log(message.tabId);
+      // console.log(message.tabId);
       try {
         browser.tabs.update(message.tabId, {
           active: true
@@ -48,6 +50,24 @@ export function initLpc(navigationListener) {
       } catch (e) {
         console.log(e.toString())
       }
+    } else if (message.command === 'get-history-ancestors') {
+      let currentId = message.visitId;
+      let ancestors = [];
+      let depth = 0;
+      while (currentId && depth < message.maxDepth) {
+        // console.log('querying', currentId);
+        let node = await Visit.getById(currentId);
+        console.log(mydump(node));
+        ancestors.push(node);
+        currentId = node.fromId;
+        ++depth;
+      }
+
+      return ancestors;
+    } else if (message.command === 'get-history-children') {
+      let currentId = message.visitId;
+      let children = await Visit.getByFromId(currentId);
+      return chlidren;
     }
   });
 }

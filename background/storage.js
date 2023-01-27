@@ -161,6 +161,7 @@ let Storage = {
 
     return new Promise(resolve => {
       let result = [];
+      // no range means all https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/index
       index.openCursor(range).onsuccess = (event) => {
         const cursor = event.target.result;
         if (!cursor) {
@@ -176,6 +177,22 @@ let Storage = {
         // console.log("twf", cursor.value.url);
         result.push(new Visit(cursor.value));
         return cursor.continue();
+      };
+    });
+  },
+  queryFromId: async (fromId) => {
+
+    const tx = DB.transaction(['visits'], 'readonly');
+    const store = tx.objectStore('visits');
+    const index = store.index('fromId');
+
+    return new Promise(resolve => {
+      let result = [];
+      // for multiple indices https://stackoverflow.com/questions/16501459/javascript-searching-indexeddb-using-multiple-indexes
+      //  objectStore.index('ssn, email, age').get(['444-44-4444', 'bill@bill@company.com', 30])
+      index.get(fromId).onsuccess = (event) => {
+        resolve(event.result);
+        return;
       };
     });
   }

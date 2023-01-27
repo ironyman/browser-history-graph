@@ -46,6 +46,7 @@ function initTheme() {
     document.getElementsByTagName('head')[0].appendChild(styleNode);
     styleNode.sheet.insertRule(`
     :root {
+      --background-color: ${theme.colors.popup};
       --text: ${theme.colors.popup_text};
       --popup_highlight: ${theme.colors.popup_highlight};
       --popup_highlight_text: ${theme.colors.popup_highlight_text};
