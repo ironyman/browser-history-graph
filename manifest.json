@@ -47,5 +47,10 @@
     "tabHide",
     "activeTab",
     "webNavigation"
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "test@gmail.com"
+    }
+  }
 }
