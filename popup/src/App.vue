@@ -4,7 +4,7 @@ You can double click on an item to turn it into a folder.
 -->
 
 <script>
-import TabTreeItem from './Components/TabTreeItem.vue'
+import TabTreeItem from './components/TabTreeItem.vue'
 import { mydump } from './debug.js';
 
 export default {
@@ -25,9 +25,9 @@ export default {
     getParentNode(query) {
       function getParentNodeAt(query, current) {
         if (!current) return undefined;
-        // console.log('parent id', current.id);
+        // console.log('parent id', current.tabId);
         for (let child of current.children) {
-          // console.log('child id', child.id);
+          // console.log('child id', child.tabId);
           if (query == child) {
             return current;
           }
@@ -38,7 +38,7 @@ export default {
         }
         return undefined;
       }
-      // console.log('query id ', query.id);
+      // console.log('query id ', query.tabId);
       return getParentNodeAt(query, this.tabForest);
       // for (let root of this.tabForest) {
       //   let result = getParentNodeAt(query, root);
@@ -62,9 +62,9 @@ export default {
       // case 2, has sibling predecessor
       let current = this.selectedNode;
       let parent = this.getParentNode(current);
-      // console.log(`parent id ${parent.id}, looking for ${current.id}, this many children ${parent.children.length}`);
+      // console.log(`parent id ${parent.tabId}, looking for ${current.tabId}, this many children ${parent.children.length}`);
       for (let siblingIndex = 0; siblingIndex < parent.children.length; ++siblingIndex) {
-        // console.log('sibling id', parent.children[siblingIndex].id);
+        // console.log('sibling id', parent.children[siblingIndex].tabId);
         if (parent.children[siblingIndex] == current) {
           // console.log('found self out of ',parent.children.length);
           if (siblingIndex == 0) {
@@ -73,7 +73,7 @@ export default {
             return;
           }
           // console.log('picking this one', parent.children[siblingIndex + 1])
-          // console.log('picking this one', parent.children[1].id)
+          // console.log('picking this one', parent.children[1].tabId)
           // console.log(mydump(parent));
           this.selectedNode = parent.children[siblingIndex - 1];
           // Descend
@@ -108,16 +108,16 @@ export default {
       let parent = this.getParentNode(current);
       // console.log("no parent?", parent);
       while (parent) {
-        // console.log(`parent id ${parent.id}, looking for ${current.id}, this many children ${parent.children.length}`);
+        // console.log(`parent id ${parent.tabId}, looking for ${current.tabId}, this many children ${parent.children.length}`);
         for (let siblingIndex = 0; siblingIndex < parent.children.length; ++siblingIndex) {
-          // console.log('sibling id', parent.children[siblingIndex].id);
+          // console.log('sibling id', parent.children[siblingIndex].tabId);
           if (parent.children[siblingIndex] == current) {
             // console.log('found self out of ',parent.children.length);
             if (siblingIndex == parent.children.length - 1) {
               break;
             }
             // console.log('picking this one', parent.children[siblingIndex + 1])
-            // console.log('picking this one', parent.children[1].id)
+            // console.log('picking this one', parent.children[1].tabId)
             // console.log(mydump(parent));
             this.selectedNode = parent.children[siblingIndex + 1];
             return;
@@ -153,7 +153,7 @@ export default {
             return true;
           }
           if (findAncestors(child)) {
-            // console.log("found ancestor", current.id)
+            // console.log("found ancestor", current.tabId)
             if (current.isClosed) {
               isClosed = true;
             }
@@ -166,7 +166,7 @@ export default {
       return isClosed;
     },
     onBodyKeyDown(event) {
-      // console.log('Key', event.key)
+      console.log('Key', event.key)
 
       if (event.key == 'ArrowDown') {
         this.nextFilteredTreeNode();
@@ -180,9 +180,18 @@ export default {
             this.selectedNode.isClosed = true;
           }
         }
+      } else if (event.key == 'ArrowRight') {
+        if (this.selectedNode) {
+          // this.$router.push({
+          //   name: '/history',
+          //   params: {
+          //     visitId: this.selectedNode.visitId,
+          //   },
+          // });
+        }
       } else if (event.key == 'Enter') {
         if (this.selectedNode) {
-          browser.tabs.update(this.selectedNode.id, {
+          browser.tabs.update(this.selectedNode.tabId, {
             active: true
           });
           window.close();
@@ -218,7 +227,7 @@ export default {
       const { top, bottom, height } = el.getBoundingClientRect()
       const holderRect = holder.getBoundingClientRect()
 
-      console.log(top, bottom, height);
+      // console.log(top, bottom, height);
 
       return top <= holderRect.top
           ? holderRect.top <= bottom && top > holderRect.bottom
@@ -246,7 +255,7 @@ export default {
       // let eTop = rect.top;
       // let eBottom = eTop + el.clientHeight;
 
-      console.log(cTop, cBottom, eTop, eBottom);
+      // console.log(cTop, cBottom, eTop, eBottom);
       // return eBottom > cBottom || eTop < cTop;
       //Check if in view
       partialTest = true;
@@ -298,13 +307,14 @@ export default {
       for (let tabId in navState.currentTabs) {
         let tab = navState.currentTabs[tabId];
         nodesMap[tab.id] = {
-          id: tab.id,
+          tabId: tab.id,
+          visitId: navState.history[tab.id].id,
           name: tab.title,
           faviconUrl: navState.history[tabId].faviconUrl,
           openerTabId: tab.openerTabId,
           children: [],
         };
-        // console.log(`adding ${tab.id} opened from ${tab.openerTabId}`);
+        console.log(`adding ${tab.id} opened from ${tab.openerTabId}`);
       }
 
       for (let tabId in nodesMap) {

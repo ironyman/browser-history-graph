@@ -29,12 +29,12 @@ export default {
       }
     },
     openTab() {
-      browser.tabs.update(this.model.id, {
+      browser.tabs.update(this.model.tabId, {
         active: true
       });
       // browser.runtime.sendMessage({
       //   command: 'show-tab',
-      //   tabId: this.model.id,
+      //   tabId: this.model.tabId,
       // });
       window.close();
     }
