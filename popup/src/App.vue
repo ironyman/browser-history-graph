@@ -166,7 +166,7 @@ export default {
       return isClosed;
     },
     onBodyKeyDown(event) {
-      console.log('Key', event.key)
+      // console.log('Key', event.key)
 
       if (event.key == 'ArrowDown') {
         this.nextFilteredTreeNode();
@@ -314,7 +314,7 @@ export default {
           openerTabId: tab.openerTabId,
           children: [],
         };
-        console.log(`adding ${tab.id} opened from ${tab.openerTabId}`);
+        // console.log(`adding ${tab.id} opened from ${tab.openerTabId}`);
       }
 
       for (let tabId in nodesMap) {
