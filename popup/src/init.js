@@ -20,12 +20,21 @@ function initTheme() {
   function applyTheme(theme) {
     if (!theme.hasOwnProperty('colors') || !theme.colors) {
       // return;
+      // theme = {
+      //   colors: {
+      //     popup: 'black',
+      //     popup_text: 'white',
+      //     popup_highlight: 'grey',
+      //     popup_highlight_text: 'white',
+      //   }
+      // }
+      // default light theme
       theme = {
         colors: {
-          popup: 'black',
-          popup_text: 'white',
-          popup_highlight: 'grey',
-          popup_highlight_text: 'white',
+          popup: 'white',
+          popup_text: 'black',
+          popup_highlight: '#dfdfef',
+          popup_highlight_text: 'black',
         }
       }
     }
